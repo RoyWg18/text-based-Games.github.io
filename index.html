@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-POP 沉浸式演藝圈 RPG</title>
+    <!-- 📱 讓 iPhone 網頁變成全螢幕 App 的核心設定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="K-POP RPG">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -20,7 +25,7 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen">
+<body class="flex flex-col md:flex-row h-screen overflow-hidden viewport-fit-cover">
 
     <aside class="w-full md:w-80 bg-gray-900 border-r border-gray-700 p-6 flex flex-col shadow-xl z-10">
         <h1 class="text-2xl font-bold text-violet-400 mb-6 tracking-wider">K-POP RPG<br><span class="text-sm text-gray-400">Game Master 系統</span></h1>
