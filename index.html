@@ -37,11 +37,14 @@
         </div>
 
         <div class="flex flex-col gap-3 mt-auto">
-            <button id="newGameBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+            <button id="newGameBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
                 新的人生 (新存檔)
             </button>
-            <button id="loadGameBtn" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.1)]" disabled>
+            <button id="loadGameBtn" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.1)]" disabled>
                 重溫舊夢 (讀取存檔)
+            </button>
+            <button id="deleteGameBtn" class="w-full bg-rose-800 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 disabled:opacity-30 disabled:cursor-not-allowed text-sm" disabled>
+                🗑️ 毀滅人生 (刪除存檔)
             </button>
         </div>
     </aside>
@@ -56,6 +59,7 @@
                     <ul class="list-disc pl-5">
                         <li>點擊<strong>「新的人生」</strong>將清除過去歷史，重啟 2007 年的練習生篇章。</li>
                         <li>若有舊的進度，可點擊綠色的<strong>「重溫舊夢」</strong>重返故事現場。</li>
+                        <li>如果不打算繼續當前的演藝生涯，可以點擊紅色的<strong>「毀滅人生」</strong>徹底清除存檔。</li>
                     </ul>
                 </div>
             </div>
@@ -139,6 +143,7 @@
         const sendBtn = document.getElementById('sendBtn');
         const newGameBtn = document.getElementById('newGameBtn');
         const loadGameBtn = document.getElementById('loadGameBtn');
+        const deleteGameBtn = document.getElementById('deleteGameBtn');
         const wikiStatus = document.getElementById('wikiStatus');
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -147,11 +152,8 @@
                 document.getElementById('apiKey').value = savedKey;
             }
 
-            // 💾 檢查是否有舊的存檔進度，有的話把「重溫舊夢」亮起來
-            const localHistory = localStorage.getItem('kpop_chat_history');
-            if (localHistory && JSON.parse(localHistory).length > 0) {
-                loadGameBtn.disabled = false;
-            }
+            // 💾 檢查並更新按鈕狀態
+            updateSaveButtonsState();
 
             try {
                 wikiStatus.innerText = "⏳ 正在自動載入 wiki.json...";
@@ -168,6 +170,18 @@
                 wikiStatus.className = "text-sm text-orange-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg";
             }
         });
+
+        // 💡 提取出獨立的按鈕狀態更新函數，方便隨時切換
+        function updateSaveButtonsState() {
+            const localHistory = localStorage.getItem('kpop_chat_history');
+            if (localHistory && JSON.parse(localHistory).length > 0) {
+                loadGameBtn.disabled = false;
+                deleteGameBtn.disabled = false;
+            } else {
+                loadGameBtn.disabled = true;
+                deleteGameBtn.disabled = true;
+            }
+        }
 
         function getRelevantContext(text) {
             if (wikiData.length === 0) return "";
@@ -284,14 +298,12 @@
                     appendMessage('bot', botReply);
                     createChoiceButtons(botReply);
                     
-                    // 儲存對話歷史與自動存檔
                     chatHistory.push({ role: 'user', parts: [{ text: promptText }] });
                     chatHistory.push({ role: 'model', parts: [{ text: botReply }] });
                     if (chatHistory.length > 14) chatHistory = chatHistory.slice(-14);
                     
-                    // 💾 寫入本地存檔
                     localStorage.setItem('kpop_chat_history', JSON.stringify(chatHistory));
-                    loadGameBtn.disabled = false; // 既然有新進度，讀檔按鈕就可用
+                    updateSaveButtonsState();
                 }
 
             } catch (err) {
@@ -307,14 +319,18 @@
             userInput.focus();
         }
 
-        // 💡 鎖定按鈕狀態的輔助函數
         function lockMenuButtons() {
             newGameBtn.disabled = true;
             newGameBtn.innerText = "遊戲進行中...";
-            newGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-3 px-4 rounded-lg cursor-not-allowed";
+            newGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-2.5 px-4 rounded-lg cursor-not-allowed";
+            
             loadGameBtn.disabled = true;
             loadGameBtn.innerText = "存檔已載入";
-            loadGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-3 px-4 rounded-lg cursor-not-allowed";
+            loadGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-2.5 px-4 rounded-lg cursor-not-allowed";
+            
+            deleteGameBtn.disabled = true;
+            deleteGameBtn.innerText = "遊戲進行中無法刪除";
+            deleteGameBtn.className = "w-full bg-gray-800 text-gray-500 font-medium py-2 px-4 rounded-lg cursor-not-allowed text-sm";
         }
 
         // 🆕 點擊「新的人生」按鈕
@@ -323,15 +339,13 @@
                 return alert("沒有 API Key 無法啟動大腦喔！");
             }
 
-            // ⚠️ 複寫機制：如果本地有舊進度，跳出確認框
             const hasSaved = localStorage.getItem('kpop_chat_history');
             if (hasSaved && JSON.parse(hasSaved).length > 0) {
                 if (!confirm("⚠️ 注意：開啟新的人生會【完全覆蓋並刪除】過去的存檔！確定要重新開始嗎？")) {
-                    return; // 玩家點擊取消，中斷動作
+                    return;
                 }
             }
 
-            // 清空舊存檔與紀錄
             localStorage.removeItem('kpop_chat_history');
             chatHistory = [];
             isGameStarted = false;
@@ -360,7 +374,6 @@
             userInput.disabled = false;
             sendBtn.disabled = false;
 
-            // 重繪歷史畫面
             chatHistory.forEach(msg => {
                 const sender = msg.role === 'user' ? 'user' : 'bot';
                 if (sender === 'user' && msg.parts[0].text.startsWith("玩家行動：")) {
@@ -371,12 +384,37 @@
                 }
             });
             
-            // 重新生出最後一回合的按鈕
             if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'model') {
                 createChoiceButtons(chatHistory[chatHistory.length - 1].parts[0].text);
             }
             
             appendMessage('bot', `<p style="color:#4ade80; font-weight:bold;">✨ 歡迎回來！已成功讀取上次進度。請繼續你的韓娛旅程！</p>`);
+        });
+
+        // 🗑️ 點擊「毀滅人生 (刪除存檔)」按鈕
+        deleteGameBtn.addEventListener('click', () => {
+            if (!confirm("⚠️ 確定要永久刪除你的韓娛人生存檔嗎？此動作將清除所有過往進度且無法復原！")) {
+                return; // 玩家點擊取消
+            }
+
+            // 執行完全清除
+            localStorage.removeItem('kpop_chat_history');
+            chatHistory = [];
+            isGameStarted = false;
+
+            // 重置介面上的歡迎語與按鈕狀態
+            chatBox.innerHTML = `
+                <div class="message-bot rounded-r-xl rounded-bl-xl p-5 md:p-6 shadow-md max-w-3xl">
+                    <div class="prose prose-invert max-w-none">
+                        <p style="color: #f87171; font-weight: bold;">🗑️ 存檔已成功徹底刪除！</p>
+                        <p>過往歷史已被洗白。你可以隨時點擊左側的<strong>「新的人生」</strong>按鈕重新開啟你的出道篇章。</p>
+                    </div>
+                </div>
+            `;
+            
+            // 重新整理按鈕狀態（讓它們變回灰色停用狀態）
+            updateSaveButtonsState();
+            alert("存檔已清除乾淨！");
         });
 
         sendBtn.addEventListener('click', () => {
