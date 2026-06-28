@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-POP 沉浸式演藝圈 RPG</title>
-    <!-- 引入 Tailwind CSS 與 Marked (用於解析 Markdown) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -34,28 +33,34 @@
 
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-400 mb-2">2. 世界觀資料庫</label>
-            <!-- 💡 移除檔案上傳按鈕，改為全自動偵測 -->
             <div id="wikiStatus" class="text-sm text-yellow-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg">正在初始化世界觀...</div>
         </div>
 
-        <button id="startBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mt-auto shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-            啟動遊戲
-        </button>
+        <div class="flex flex-col gap-3 mt-auto">
+            <button id="newGameBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+                新的人生 (新存檔)
+            </button>
+            <button id="loadGameBtn" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.1)]" disabled>
+                重溫舊夢 (讀取存檔)
+            </button>
+        </div>
     </aside>
 
     <main class="flex-1 flex flex-col bg-slate-900 relative">
         <div id="chatBox" class="chat-container p-4 md:p-8 flex flex-col gap-6">
-            <!-- 歡迎訊息 -->
             <div class="message-bot rounded-r-xl rounded-bl-xl p-5 md:p-6 shadow-md max-w-3xl">
                 <div class="prose prose-invert max-w-none">
                     <h3>歡迎來到 K-POP 演藝圈模擬器</h3>
                     <p>請先在左側填寫 <strong>Gemini API Key</strong>。系統將自動為您連接本機打包的 <strong>wiki.json</strong> 知識庫。</p>
-                    <p>完成後點擊「啟動遊戲」，GM 將引導你創建專屬的練習生角色，踏上 2007 年的女團盛世之路！</p>
+                    <p>完成後點擊左下角按鈕：</p>
+                    <ul class="list-disc pl-5">
+                        <li>點擊<strong>「新的人生」</strong>將清除過去歷史，重啟 2007 年的練習生篇章。</li>
+                        <li>若有舊的進度，可點擊綠色的<strong>「重溫舊夢」</strong>重返故事現場。</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <!-- 底部輸入框 -->
         <div class="p-4 bg-gray-800 border-t border-gray-700 absolute bottom-0 w-full">
             <div class="max-w-4xl mx-auto relative flex items-center">
                 <textarea id="userInput" rows="1" class="w-full bg-gray-700 border border-gray-600 rounded-2xl pl-4 pr-12 py-3 text-white focus:ring-violet-500 focus:border-violet-500 resize-none" placeholder="輸入你的行動或對話..." disabled></textarea>
@@ -69,7 +74,6 @@
     </main>
 
     <script>
-        // GM 系統提示詞
         const SYSTEM_PROMPT = `你是沉浸式文字互動遊戲（RPG）的主持人（Game Master）。
 背景為真實韓國娛樂圈。時間從 2007 年少女時代出道後、黑海事件前夕開始，跨越二、三、四、五代團至 2026 年。
 遊戲風格：偶像成長史、娛樂圈奮鬥史、長篇群像劇、戀愛情感劇。
@@ -119,7 +123,7 @@
 • 低聲耳語
 • 心跳加速
 • 難以克制的情緒波動
-所有涉及性愛的段落將不再做任何概括、模糊或省略，皆以最大尺度、完整展現角色肉體碰撞、呻吟、叫床聲、狀聲詞以及哭喊求饒等極致情欲細節為最高描寫原則。
+所有涉及性愛的段落將不再做任何概括、模糊或省略，皆以最大尺度、完整展現角色肉體碰撞、呻吟、叫床聲、狀聲詞以及哭喊求饒等極致情欲細節為最高描寫原則。描寫極致的情感波動與肉體接觸帶來的心理震撼，所有情感戲皆須具備完整鋪陳與後續影響。
 
 輸出格式必須包含：
 【劇情】(內容)
@@ -133,14 +137,20 @@
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
-        const startBtn = document.getElementById('startBtn');
+        const newGameBtn = document.getElementById('newGameBtn');
+        const loadGameBtn = document.getElementById('loadGameBtn');
         const wikiStatus = document.getElementById('wikiStatus');
 
-        // 💡 網頁載入時：自動下載 wiki.json，並填入上次記憶的 API Key
         window.addEventListener('DOMContentLoaded', async () => {
             const savedKey = localStorage.getItem('kpop_gemini_key');
             if (savedKey) {
                 document.getElementById('apiKey').value = savedKey;
+            }
+
+            // 💾 檢查是否有舊的存檔進度，有的話把「重溫舊夢」亮起來
+            const localHistory = localStorage.getItem('kpop_chat_history');
+            if (localHistory && JSON.parse(localHistory).length > 0) {
+                loadGameBtn.disabled = false;
             }
 
             try {
@@ -148,8 +158,6 @@
                 const response = await fetch('wiki.json');
                 if (!response.ok) throw new Error("找不到 wiki.json 檔案");
                 const data = await response.json();
-                
-                // 修正你的 wiki.json 若是物件格式，將其轉為數組以便遍歷
                 wikiData = Array.isArray(data) ? data : Object.values(data);
                 
                 wikiStatus.innerHTML = `✅ 自動載入成功！共 ${wikiData.length} 條世界觀。`;
@@ -161,12 +169,10 @@
             }
         });
 
-        // 簡單的關鍵字檢索功能
         function getRelevantContext(text) {
             if (wikiData.length === 0) return "";
             let contextBlocks = [];
             for (let entry of wikiData) {
-                // 有些知識庫結構欄位為 title 或 name，這裡做雙重相容
                 const title = entry.title || entry.name || "";
                 const content = entry.content || entry.text || "";
                 if (title && text.includes(title)) {
@@ -192,9 +198,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // 💡 修正可選行動按鈕生成邏輯
         function createChoiceButtons(text) {
-            // 移除舊的按鈕區塊防止疊加
             const oldButtons = document.getElementById('choices-container');
             if (oldButtons) oldButtons.remove();
 
@@ -217,7 +221,6 @@
                 btn.className = "bg-violet-700 hover:bg-violet-600 text-white font-medium text-sm px-4 py-2.5 rounded-xl transition duration-150 shadow-sm";
                 btn.innerText = line;
                 btn.onclick = () => {
-                    // 點擊後直接送出選項
                     callGeminiAPI(line);
                 };
                 div.appendChild(btn);
@@ -234,10 +237,8 @@
                 return;
             }
 
-            // 儲存金鑰到瀏覽器本地
             localStorage.setItem('kpop_gemini_key', apiKey);
 
-            // UI 狀態切換
             userInput.disabled = true;
             sendBtn.disabled = true;
             appendMessage('user', userMessage);
@@ -246,10 +247,8 @@
             chatBox.insertAdjacentHTML('beforeend', `<div id="${loadingId}" class="text-gray-400 italic text-sm ml-4">GM 正在構思劇情...</div>`);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // 抓取相關的 wiki 資料
             const context = getRelevantContext(userMessage);
             
-            // 構建這次要送給 API 的完整 Prompt
             let promptText = "";
             if (!isGameStarted) {
                 promptText = `${SYSTEM_PROMPT}\n\n玩家已準備好，請輸出第一回合的開局角色設定問卷。`;
@@ -259,7 +258,6 @@
             }
 
             try {
-                // 使用修正後的穩定 1.5-flash 或 2.5-flash 呼叫路徑
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -286,10 +284,14 @@
                     appendMessage('bot', botReply);
                     createChoiceButtons(botReply);
                     
-                    // 儲存對話歷史
+                    // 儲存對話歷史與自動存檔
                     chatHistory.push({ role: 'user', parts: [{ text: promptText }] });
                     chatHistory.push({ role: 'model', parts: [{ text: botReply }] });
-                    if (chatHistory.length > 14) chatHistory = chatHistory.slice(-14); // 控制長度避免爆 Token
+                    if (chatHistory.length > 14) chatHistory = chatHistory.slice(-14);
+                    
+                    // 💾 寫入本地存檔
+                    localStorage.setItem('kpop_chat_history', JSON.stringify(chatHistory));
+                    loadGameBtn.disabled = false; // 既然有新進度，讀檔按鈕就可用
                 }
 
             } catch (err) {
@@ -299,28 +301,82 @@
                 appendMessage('bot', `### 發生錯誤\n\n${err.message}\n\n請確認您的 API Key 是否正確或網路狀態健全。`);
             }
 
-            // 恢復 UI 狀態
             userInput.disabled = false;
             sendBtn.disabled = false;
             userInput.value = '';
             userInput.focus();
         }
 
-        startBtn.addEventListener('click', () => {
+        // 💡 鎖定按鈕狀態的輔助函數
+        function lockMenuButtons() {
+            newGameBtn.disabled = true;
+            newGameBtn.innerText = "遊戲進行中...";
+            newGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-3 px-4 rounded-lg cursor-not-allowed";
+            loadGameBtn.disabled = true;
+            loadGameBtn.innerText = "存檔已載入";
+            loadGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-3 px-4 rounded-lg cursor-not-allowed";
+        }
+
+        // 🆕 點擊「新的人生」按鈕
+        newGameBtn.addEventListener('click', () => {
             if (!document.getElementById('apiKey').value.trim()) {
-                alert("沒有 API Key 無法啟動大腦喔！");
-                return;
+                return alert("沒有 API Key 無法啟動大腦喔！");
             }
+
+            // ⚠️ 複寫機制：如果本地有舊進度，跳出確認框
+            const hasSaved = localStorage.getItem('kpop_chat_history');
+            if (hasSaved && JSON.parse(hasSaved).length > 0) {
+                if (!confirm("⚠️ 注意：開啟新的人生會【完全覆蓋並刪除】過去的存檔！確定要重新開始嗎？")) {
+                    return; // 玩家點擊取消，中斷動作
+                }
+            }
+
+            // 清空舊存檔與紀錄
+            localStorage.removeItem('kpop_chat_history');
+            chatHistory = [];
+            isGameStarted = false;
             
-            startBtn.disabled = true;
-            startBtn.innerText = "遊戲進行中...";
-            startBtn.classList.replace('bg-violet-600', 'bg-gray-600');
-            startBtn.classList.remove('hover:bg-violet-500');
-            
-            chatBox.innerHTML = ''; // 清空歡迎訊息
+            lockMenuButtons();
+            chatBox.innerHTML = ''; 
             userInput.disabled = false;
             sendBtn.disabled = false;
             callGeminiAPI("遊戲開始");
+        });
+
+        // 💾 點擊「重溫舊夢」按鈕
+        loadGameBtn.addEventListener('click', () => {
+            if (!document.getElementById('apiKey').value.trim()) {
+                return alert("沒有 API Key 無法啟動大腦喔！");
+            }
+
+            const localHistory = localStorage.getItem('kpop_chat_history');
+            if (!localHistory) return alert("找不到可讀取的存檔！");
+
+            chatHistory = JSON.parse(localHistory);
+            isGameStarted = true;
+            
+            lockMenuButtons();
+            chatBox.innerHTML = ''; 
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+
+            // 重繪歷史畫面
+            chatHistory.forEach(msg => {
+                const sender = msg.role === 'user' ? 'user' : 'bot';
+                if (sender === 'user' && msg.parts[0].text.startsWith("玩家行動：")) {
+                    const cleanText = msg.parts[0].text.replace("玩家行動：", "").split("\n\n【系統提示：")[0];
+                    appendMessage('user', cleanText);
+                } else if (sender === 'bot') {
+                    appendMessage('bot', msg.parts[0].text);
+                }
+            });
+            
+            // 重新生出最後一回合的按鈕
+            if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'model') {
+                createChoiceButtons(chatHistory[chatHistory.length - 1].parts[0].text);
+            }
+            
+            appendMessage('bot', `<p style="color:#4ade80; font-weight:bold;">✨ 歡迎回來！已成功讀取上次進度。請繼續你的韓娛旅程！</p>`);
         });
 
         sendBtn.addEventListener('click', () => {
@@ -328,7 +384,6 @@
             if (text) callGeminiAPI(text);
         });
 
-        // 💡 修正原本遺失括號的 Enter 監聽器
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
