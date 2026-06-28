@@ -1,0 +1,14 @@
+[
+  {
+    "title": "index",
+    "content": "---\ntype: overview\ntitle: 项目概述\ntags: []\nrelated: [wiki/entities/SM娱乐.md, wiki/entities/JYP娱乐.md, wiki/entities/YG娱乐.md, wiki/entities/CJ集团.md, wiki/entities/三星集团.md, wiki/entities/中央日报系.md, wiki/entities/Kakao.md, wiki/entities/NAVER.md, wiki/concepts/财閇.md, wiki/concepts/练习生制度.md, wiki/concepts/金汤匙与泥汤匙.md, wiki/concepts/赞助商文化.md]\n---\n\n# 概述\n\n韓國娛樂圈（K-POP）以高度工業化的「偶像練習生制度」聞名。練習生通常在10歲至15歲之間被經紀公司選中，經歷數年嚴格的歌唱、舞蹈與外語訓練後，透過層層淘汰才能以「偶像團體」出道。偶像的職業生涯充滿激烈競爭、嚴格的合約限制（通常為7年）、粉絲文化（如應援色、粉絲俱樂部）以及無處不在的網路輿論壓力。\n\n## 源頭\n韓國娛樂圈歷史中，長期由三大經紀公司主導市場，各自擁有強烈的企業文化和音樂風格：\n1. **SM娛樂 (SM Entertainment)**：由李秀滿創辦，被譽為「造星工廠」。注重藝人的精緻外貌、刀群舞與宏大的世界觀概念。\n2. **JYP娛樂 (JYP Entertainment)**：由朴軫永創辦。強調藝人的真實性格、親和力與獨特的「半空氣半聲音」唱法。\n3. **YG娛樂 (YG Entertainment)**：由梁玄錫創立。以黑人嘻哈音樂起家，強調藝人的創作能力、強烈個性和舞台感染力。\n\n## 新興巨頭\n2005年由房時爀創辦的 Big Hit 娛樂，初期規模極小。直到2013年推出防彈少年團（BTS）並在全球取得空前成功後，公司迅速壯大。2021年更名為 HYBE，並透過不斷收購其他中小型經紀公司，打破了傳統的三大公司格局，成為韓國市值最高的跨國娛樂集團。\n\n## 二代女團\n2007年是韓國娛樂圈極具歷史意義的一年，被視為「二代女團」的開局之年。這一年內，三大公司紛紛推出了對後世影響深遠的女子團體：\n- **Wonder Girls**：由JYP Entertainment推出。\n- **KARA**：由DSP Entertainment推出。\n- **少女時代 (Girls' Generation)**：由SM Entertainment推出。\n\n## 禁愛令\n在韓國娛樂圈，偶像的「戀愛」被視為嚴重的職業危機，俗稱「偶像失格」。許多經紀公司會在合約中明訂3至5年的禁愛令。若在此期間爆出緋聞，可能會面臨雪藏、退隊或解約的處分。\n"
+  },
+  {
+    "title": "log",
+    "content": "# Research Log\n\n## 2026-06-28\n\n- Project created\n\n\n---\ntype: overview\ntitle: Project Overview\ntags: []\nrelated: []\ncreated: 2026-06-28\nupdated: 2026-06-28\n---\n## 2026-06-28\n\n- 複製並整理「韓娱基础历史.md」，生成了以下文件：wiki/sources/韓娱基础历史.md, wiki/entities/SM娱乐.md, wiki/entities/JYP娱乐.md, wiki/entities/YG娱乐.md, wiki/entities/HYBE.md, wiki/entities/Wonder Girls.md, wiki/entities/KARA.md, wiki/entities/少女时代 (Girls' Generation).md, wiki/entities/防彈少年團 (BTS).md, wiki/concepts/偶像练习生制度.md, wiki/concepts/粉丝文化.md, wiki/concepts/禁爱令.md，並更新了wiki/index.md 和 wiki/log.md。\n\n## 2026-06-28 ingest | 韓國企業與財閇歷史"
+  },
+  {
+    "title": "overview",
+    "content": "---\ntype: overview\ntitle: 项目概述\ntags: []\nrelated: []\n---\n\n# 概述\n\n韓國娛樂圈（K-POP）以高度工業化的「偶像練習生制度」聞名。練習生通常在10歲至15歲之間被經紀公司選中，經歷數年嚴格的歌唱、舞蹈與外語訓練後，透過層層淘汰才能以「偶像團體」出道。偶像的職業生涯充滿激烈競爭、嚴格的合約限制（通常為7年）、粉絲文化（如應援色、粉絲俱樂部）以及無處不在的網路輿論壓力。\n\n## 源頭\n韓國娛樂圈歷史中，長期由三大經紀公司主導市場，各自擁有強烈的企業文化和音樂風格：\n1. **SM娛樂 (SM Entertainment)**：由李秀滿創辦，被譽為「造星工廠」。注重藝人的精緻外貌、刀群舞與宏大的世界觀概念。\n2. **JYP娛樂 (JYP Entertainment)**：由朴軫永創辦。強調藝人的真實性格、親和力與獨特的「半空氣半聲音」唱法。\n3. **YG娛樂 (YG Entertainment)**：由梁玄錫創立。以黑人嘻哈音樂起家，強調藝人的創作能力、強烈個性和舞台感染力。\n\n## 新興巨頭\n2005年由房時爀創辦的 Big Hit 娛樂，初期規模極小。直到2013年推出防彈少年團（BTS）並在全球取得空前成功後，公司迅速壯大。2021年更名為 HYBE，並透過不斷收購其他中小型經紀公司，打破了傳統的三大公司格局，成為韓國市值最高的跨國娛樂集團。\n\n## 二代女團\n2007年是韓國娛樂圈極具歷史意義的一年，被視為「二代女團」的開局之年。這一年內，三大公司紛紛推出了對後世影響深遠的女子團體：\n- **Wonder Girls**：由JYP Entertainment推出。\n- **KARA**：由DSP Entertainment推出。\n- **少女時代 (Girls' Generation)**：由SM Entertainment推出。\n\n## 禁愛令\n在韓國娛樂圈，偶像的「戀愛」被視為嚴重的職業危機，俗稱「偶像失格」。許多經紀公司會在合約中明訂3至5年的禁愛令。若在此期間爆出緋聞，可能會面臨雪藏、退隊或解約的處分。"
+  }
+]
