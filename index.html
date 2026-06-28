@@ -31,9 +31,10 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen overflow-hidden viewport-fit-cover">
+<!-- 1. 修正 body：手機版允許自然滾動 (overflow-y-auto)，電腦版 md: 保持鎖定 (md:overflow-hidden) -->
+<body class="flex flex-col md:flex-row min-h-screen h-auto md:h-screen overflow-y-auto md:overflow-hidden viewport-fit-cover">
 
-   <!-- 修正 md:w-85 改為 md:w-96 (固定寬度)，避免在寬螢幕下橫向炸開 -->
+    <!-- 2. 修正 aside：電腦版固定寬度 md:w-96，加上 shrink-0 防止被擠壓擠扁 -->
     <aside class="w-full md:w-96 bg-gray-900 border-r border-gray-700 p-5 flex flex-col shadow-xl z-10 overflow-y-auto shrink-0">
         <h1 class="text-2xl font-bold text-violet-400 mb-4 tracking-wider">K-POP RPG<br><span class="text-sm text-gray-400">Game Master 系統</span></h1>
         
@@ -76,6 +77,9 @@
             </button>
         </div>
     </aside>
+
+    <!-- 3. 修正 main：加上 min-w-0 確保寬度自適應分配，在電腦版上完全展開 -->
+    <main class="flex-1 min-w-0 flex flex-col bg-slate-900 relative">
 
     <main class="flex-1 flex flex-col bg-slate-900 relative">
         <div id="chatBox" class="chat-container p-4 md:p-8 flex flex-col gap-6">
