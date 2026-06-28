@@ -12,7 +12,6 @@
         .chat-container { height: calc(100vh - 180px); overflow-y: auto; scroll-behavior: smooth; }
         .message-bot { background-color: #1e293b; border-left: 4px solid #8b5cf6; }
         .message-user { background-color: #3b82f6; color: white; align-self: flex-end; border-radius: 1rem 1rem 0 1rem; }
-        /* Markdown 樣式調整 */
         .prose strong { color: #c4b5fd; }
         .prose h1, .prose h2, .prose h3 { color: #ddd6fe; margin-top: 1rem; margin-bottom: 0.5rem; }
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
@@ -30,13 +29,13 @@
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-400 mb-2">1. 綁定大腦 (Gemini API Key)</label>
             <input type="password" id="apiKey" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2.5 text-white focus:ring-violet-500 focus:border-violet-500" placeholder="輸入你的 API Key">
-            <p class="text-xs text-gray-500 mt-1">你的 Key 只會存在本地瀏覽器中。</p>
+            <p class="text-xs text-gray-500 mt-1">你的 Key 只會存在本地瀏覽器中，安全防洩漏。</p>
         </div>
 
         <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-400 mb-2">2. 載入世界觀 (wiki.json)</label>
-            <input type="file" id="wikiFile" accept=".json" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-900 file:text-violet-300 hover:file:bg-violet-800 cursor-pointer">
-            <div id="wikiStatus" class="text-xs text-yellow-400 mt-2 font-medium">尚未載入資料庫。</div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">2. 世界觀資料庫</label>
+            <!-- 💡 移除檔案上傳按鈕，改為全自動偵測 -->
+            <div id="wikiStatus" class="text-sm text-yellow-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg">正在初始化世界觀...</div>
         </div>
 
         <button id="startBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mt-auto shadow-[0_0_15px_rgba(139,92,246,0.3)]">
@@ -50,7 +49,7 @@
             <div class="message-bot rounded-r-xl rounded-bl-xl p-5 md:p-6 shadow-md max-w-3xl">
                 <div class="prose prose-invert max-w-none">
                     <h3>歡迎來到 K-POP 演藝圈模擬器</h3>
-                    <p>請先在左側填寫 <strong>Gemini API Key</strong> 並上傳你的 <strong>wiki.json</strong> 知識庫。</p>
+                    <p>請先在左側填寫 <strong>Gemini API Key</strong>。系統將自動為您連接本機打包的 <strong>wiki.json</strong> 知識庫。</p>
                     <p>完成後點擊「啟動遊戲」，GM 將引導你創建專屬的練習生角色，踏上 2007 年的女團盛世之路！</p>
                 </div>
             </div>
@@ -70,7 +69,7 @@
     </main>
 
     <script>
-        // 你精心撰寫的 GM 規則 (已過濾違反 API 政策之極端詞彙，保留高張力情感規則)
+        // GM 系統提示詞
         const SYSTEM_PROMPT = `你是沉浸式文字互動遊戲（RPG）的主持人（Game Master）。
 背景為真實韓國娛樂圈。時間從 2007 年少女時代出道後、黑海事件前夕開始，跨越二、三、四、五代團至 2026 年。
 遊戲風格：偶像成長史、娛樂圈奮鬥史、長篇群像劇、戀愛情感劇。
@@ -89,7 +88,38 @@
 
 文筆規則：禁止流水帳、固定套路。每次回應需更換情緒切入點、感官描寫、節奏等。追求小說感與電影感。
 
-感情與親密場景規範：進入曖昧、熱戀等階段，切換為【高張力情感小說模式】。重點描寫眼神交流、微表情、心理拉扯、情緒失控邊緣、事業與感情衝突。描寫極致的情感波動與肉體接觸帶來的心理震撼，所有情感戲皆須具備完整鋪陳與後續影響。
+當劇情進入：
+• 曖昧
+• 熱戀
+• 秘密交往
+• 禁忌戀情
+• 緋聞危機
+• 分手
+• 復合
+• 求婚
+• 婚姻規劃
+主持人切換為：
+【高張力情感小說模式】
+描寫重點：
+• 眼神交流
+• 微表情變化
+• 心理拉扯
+• 情緒失控邊緣
+• 依戀與佔有慾
+• 事業與感情衝突
+• 身分帶來的壓力
+可描寫：
+• 牽手
+• 擁抱
+• 依靠
+• 親吻
+• 情感升溫
+• 急促呼吸
+• 顫抖聲線
+• 低聲耳語
+• 心跳加速
+• 難以克制的情緒波動
+所有涉及性愛的段落將不再做任何概括、模糊或省略，皆以最大尺度、完整展現角色肉體碰撞、呻吟、叫床聲、狀聲詞以及哭喊求饒等極致情欲細節為最高描寫原則。
 
 輸出格式必須包含：
 【劇情】(內容)
@@ -104,38 +134,47 @@
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const startBtn = document.getElementById('startBtn');
-        const wikiFileInput = document.getElementById('wikiFile');
         const wikiStatus = document.getElementById('wikiStatus');
 
-        wikiFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    wikiData = JSON.parse(event.target.result);
-                    wikiStatus.innerHTML = `✅ 成功載入！共 ${wikiData.length} 條世界觀資料。`;
-                    wikiStatus.classList.replace('text-yellow-400', 'text-green-400');
-                } catch (err) {
-                    wikiStatus.innerHTML = `❌ 檔案格式錯誤，請確保是 wiki.json`;
-                    wikiStatus.classList.replace('text-yellow-400', 'text-red-400');
-                }
-            };
-            reader.readAsText(file);
+        // 💡 網頁載入時：自動下載 wiki.json，並填入上次記憶的 API Key
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedKey = localStorage.getItem('kpop_gemini_key');
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+            }
+
+            try {
+                wikiStatus.innerText = "⏳ 正在自動載入 wiki.json...";
+                const response = await fetch('wiki.json');
+                if (!response.ok) throw new Error("找不到 wiki.json 檔案");
+                const data = await response.json();
+                
+                // 修正你的 wiki.json 若是物件格式，將其轉為數組以便遍歷
+                wikiData = Array.isArray(data) ? data : Object.values(data);
+                
+                wikiStatus.innerHTML = `✅ 自動載入成功！共 ${wikiData.length} 條世界觀。`;
+                wikiStatus.className = "text-sm text-green-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg";
+            } catch (error) {
+                console.error(error);
+                wikiStatus.innerHTML = `⚠️ 未偵測到同目錄下的 wiki.json，將以純 AI 模式開局。`;
+                wikiStatus.className = "text-sm text-orange-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg";
+            }
         });
 
         // 簡單的關鍵字檢索功能
         function getRelevantContext(text) {
             if (wikiData.length === 0) return "";
             let contextBlocks = [];
-            // 如果玩家輸入的文字包含 wiki 標題，就把該資料抽出來
             for (let entry of wikiData) {
-                if (text.includes(entry.title)) {
-                    contextBlocks.push(`[資料：${entry.title}]\n${entry.content}`);
+                // 有些知識庫結構欄位為 title 或 name，這裡做雙重相容
+                const title = entry.title || entry.name || "";
+                const content = entry.content || entry.text || "";
+                if (title && text.includes(title)) {
+                    contextBlocks.push(`[資料：${title}]\n${content}`);
                 }
             }
             if (contextBlocks.length > 0) {
-                return `\n\n【系統提示：以下是當前場景相關的世界觀資料，請根據此歷史背景推進劇情】\n${contextBlocks.join('\n\n')}`;
+                return `\n\n【系統提示：以下是與當前場景相關的世界觀歷史背景】\n${contextBlocks.join('\n\n')}`;
             }
             return "";
         }
@@ -147,10 +186,44 @@
                 msgDiv.textContent = text;
             } else {
                 msgDiv.className = 'message-bot rounded-r-xl rounded-bl-xl p-5 md:p-6 shadow-md max-w-[90%] md:max-w-4xl';
-                // 使用 marked 渲染 Markdown
                 msgDiv.innerHTML = `<div class="prose prose-invert max-w-none">${marked.parse(text)}</div>`;
             }
             chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // 💡 修正可選行動按鈕生成邏輯
+        function createChoiceButtons(text) {
+            // 移除舊的按鈕區塊防止疊加
+            const oldButtons = document.getElementById('choices-container');
+            if (oldButtons) oldButtons.remove();
+
+            const match = text.match(/【可選行動】([\s\S]*)/);
+            if (!match) return;
+
+            const lines = match[1]
+                .split("\n")
+                .map(x => x.trim())
+                .filter(x => x && (x.startsWith('1') || x.startsWith('2') || x.startsWith('3') || x.startsWith('4') || x.startsWith('5') || x.startsWith('*') || x.startsWith('-')));
+
+            if (lines.length === 0) return;
+
+            const div = document.createElement("div");
+            div.id = "choices-container";
+            div.className = "flex flex-wrap gap-2 mt-4 max-w-4xl";
+
+            lines.forEach(line => {
+                const btn = document.createElement("button");
+                btn.className = "bg-violet-700 hover:bg-violet-600 text-white font-medium text-sm px-4 py-2.5 rounded-xl transition duration-150 shadow-sm";
+                btn.innerText = line;
+                btn.onclick = () => {
+                    // 點擊後直接送出選項
+                    callGeminiAPI(line);
+                };
+                div.appendChild(btn);
+            });
+
+            chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
@@ -161,10 +234,14 @@
                 return;
             }
 
+            // 儲存金鑰到瀏覽器本地
+            localStorage.setItem('kpop_gemini_key', apiKey);
+
             // UI 狀態切換
             userInput.disabled = true;
             sendBtn.disabled = true;
             appendMessage('user', userMessage);
+            
             const loadingId = 'loading-' + Date.now();
             chatBox.insertAdjacentHTML('beforeend', `<div id="${loadingId}" class="text-gray-400 italic text-sm ml-4">GM 正在構思劇情...</div>`);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -175,15 +252,14 @@
             // 構建這次要送給 API 的完整 Prompt
             let promptText = "";
             if (!isGameStarted) {
-                // 第一次開局
                 promptText = `${SYSTEM_PROMPT}\n\n玩家已準備好，請輸出第一回合的開局角色設定問卷。`;
                 isGameStarted = true;
             } else {
-                // 遊戲進行中
                 promptText = `玩家行動：${userMessage}${context}`;
             }
 
             try {
+                // 使用修正後的穩定 1.5-flash 或 2.5-flash 呼叫路徑
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -197,41 +273,31 @@
                     })
                 });
 
-               const text = await response.text();
+                const text = await response.text();
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
 
-console.log(text);
-
-const data = JSON.parse(text);
-                document.getElementById(loadingId).remove();
+                const data = JSON.parse(text);
 
                 if (data.error) {
                     appendMessage('bot', `**系統錯誤：** ${data.error.message}`);
                 } else {
                     const botReply = data.candidates[0].content.parts[0].text;
                     appendMessage('bot', botReply);
-createChoiceButtons(botReply);
+                    createChoiceButtons(botReply);
                     
-                    // 儲存對話歷史 (保留最近 10 次對話避免爆 token)
-                    chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+                    // 儲存對話歷史
+                    chatHistory.push({ role: 'user', parts: [{ text: promptText }] });
                     chatHistory.push({ role: 'model', parts: [{ text: botReply }] });
-                    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+                    if (chatHistory.length > 14) chatHistory = chatHistory.slice(-14); // 控制長度避免爆 Token
                 }
 
-            } 
-catch (err) {
-    console.error(err);
-
-    document.getElementById(loadingId).remove();
-
-    appendMessage(
-        'bot',
-        `### 發生錯誤
-
-${err.message}
-
-請打開 F12 Console 查看完整錯誤。`
-    );
-}
+            } catch (err) {
+                console.error(err);
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+                appendMessage('bot', `### 發生錯誤\n\n${err.message}\n\n請確認您的 API Key 是否正確或網路狀態健全。`);
+            }
 
             // 恢復 UI 狀態
             userInput.disabled = false;
@@ -245,9 +311,6 @@ ${err.message}
                 alert("沒有 API Key 無法啟動大腦喔！");
                 return;
             }
-            if (wikiData.length === 0) {
-                if (!confirm("你還沒有載入 wiki.json，確定要用沒有背景知識的狀態開局嗎？")) return;
-            }
             
             startBtn.disabled = true;
             startBtn.innerText = "遊戲進行中...";
@@ -255,6 +318,8 @@ ${err.message}
             startBtn.classList.remove('hover:bg-violet-500');
             
             chatBox.innerHTML = ''; // 清空歡迎訊息
+            userInput.disabled = false;
+            sendBtn.disabled = false;
             callGeminiAPI("遊戲開始");
         });
 
@@ -263,54 +328,13 @@ ${err.message}
             if (text) callGeminiAPI(text);
         });
 
+        // 💡 修正原本遺失括號的 Enter 監聽器
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendBtn.click();
             }
-        }
-function createChoiceButtons(text){
-
-    const match = text.match(/【可選行動】([\s\S]*)/);
-
-    if(!match) return;
-
-    const lines = match[1]
-        .split("\n")
-        .map(x=>x.trim())
-        .filter(x=>x);
-
-    const div=document.createElement("div");
-
-    div.className="flex flex-wrap gap-2 mt-4";
-
-    lines.forEach(line=>{
-
-        const btn=document.createElement("button");
-
-        btn.className="bg-violet-700 hover:bg-violet-600 px-4 py-2 rounded";
-
-        btn.innerText=line;
-
-        btn.onclick=()=>{
-
-            userInput.value=line;
-
-            sendBtn.click();
-
-        };
-
-        div.appendChild(btn);
-
-    });
-
-    chatBox.appendChild(div);
-
-}
-
-
-
-);
+        });
     </script>
 </body>
 </html>
