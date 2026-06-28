@@ -33,7 +33,8 @@
 </head>
 <body class="flex flex-col md:flex-row h-screen overflow-hidden viewport-fit-cover">
 
-    <aside class="w-full md:w-85 bg-gray-900 border-r border-gray-700 p-5 flex flex-col shadow-xl z-10 overflow-y-auto">
+   <!-- 修正 md:w-85 改為 md:w-96 (固定寬度)，避免在寬螢幕下橫向炸開 -->
+    <aside class="w-full md:w-96 bg-gray-900 border-r border-gray-700 p-5 flex flex-col shadow-xl z-10 overflow-y-auto shrink-0">
         <h1 class="text-2xl font-bold text-violet-400 mb-4 tracking-wider">K-POP RPG<br><span class="text-sm text-gray-400">Game Master 系統</span></h1>
         
         <!-- 🔑 1. Gemini Key -->
