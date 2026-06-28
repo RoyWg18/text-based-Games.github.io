@@ -2,15 +2,21 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-POP 沉浸式演藝圈 RPG</title>
-    <!-- 📱 讓 iPhone 網頁變成全螢幕 App 的核心設定 -->
+    
+    <!-- 📱 PWA 全螢幕優化：消除 iPhone Safari 上下白邊 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="K-POP RPG">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- ☁️ 載入 Google 官方 API 腳本 -->
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
         .chat-container { height: calc(100vh - 180px); overflow-y: auto; scroll-behavior: smooth; }
@@ -27,29 +33,45 @@
 </head>
 <body class="flex flex-col md:flex-row h-screen overflow-hidden viewport-fit-cover">
 
-    <aside class="w-full md:w-80 bg-gray-900 border-r border-gray-700 p-6 flex flex-col shadow-xl z-10">
-        <h1 class="text-2xl font-bold text-violet-400 mb-6 tracking-wider">K-POP RPG<br><span class="text-sm text-gray-400">Game Master 系統</span></h1>
+    <aside class="w-full md:w-85 bg-gray-900 border-r border-gray-700 p-5 flex flex-col shadow-xl z-10 overflow-y-auto">
+        <h1 class="text-2xl font-bold text-violet-400 mb-4 tracking-wider">K-POP RPG<br><span class="text-sm text-gray-400">Game Master 系統</span></h1>
         
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-400 mb-2">1. 綁定大腦 (Gemini API Key)</label>
-            <input type="password" id="apiKey" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2.5 text-white focus:ring-violet-500 focus:border-violet-500" placeholder="輸入你的 API Key">
-            <p class="text-xs text-gray-500 mt-1">你的 Key 只會存在本地瀏覽器中，安全防洩漏。</p>
+        <!-- 🔑 1. Gemini Key -->
+        <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-400 mb-1">1. Gemini 大腦 API Key</label>
+            <input type="password" id="apiKey" autocomplete="new-password" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-sm text-white focus:ring-violet-500 focus:border-violet-500" placeholder="輸入 Gemini API Key">
         </div>
 
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-400 mb-2">2. 世界觀資料庫</label>
-            <div id="wikiStatus" class="text-sm text-yellow-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg">正在初始化世界觀...</div>
+        <!-- ☁️ 2. Google 雲端硬碟同步設定區 -->
+        <div class="mb-4 bg-gray-800/60 p-3 border border-gray-700 rounded-xl">
+            <label class="block text-xs font-bold text-emerald-400 mb-2 tracking-wide">☁️ 跨端雲端同步 (Google Drive)</label>
+            <div class="flex flex-col gap-2">
+                <input type="password" id="gDriveKey" autocomplete="new-password" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-1.5 text-xs text-white" placeholder="Google 雲端 API 金鑰">
+                <input type="text" id="gClientId" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-1.5 text-xs text-white" placeholder="Google Client ID">
+                
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <button id="cloudUploadBtn" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-1.5 px-2 rounded text-xs transition disabled:opacity-40" disabled>📤 上傳雲端</button>
+                    <button id="cloudDownloadBtn" class="bg-teal-700 hover:bg-teal-600 text-white font-bold py-1.5 px-2 rounded text-xs transition disabled:opacity-40" disabled>📥 同步雲端</button>
+                </div>
+                <div id="cloudStatus" class="text-[11px] text-gray-400 text-center mt-1">請先填寫上方雲端憑證</div>
+            </div>
         </div>
 
-        <div class="flex flex-col gap-3 mt-auto">
-            <button id="newGameBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+        <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-400 mb-1">3. 世界觀資料庫</label>
+            <div id="wikiStatus" class="text-xs text-yellow-400 font-medium bg-gray-800 border border-gray-700 p-2 rounded-lg">正在初始化世界觀...</div>
+        </div>
+
+        <!-- 🎮 遊戲核心按鈕 -->
+        <div class="flex flex-col gap-2 mt-auto">
+            <button id="newGameBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 text-sm shadow-[0_0_15px_rgba(139,92,246,0.2)]">
                 新的人生 (新存檔)
             </button>
-            <button id="loadGameBtn" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.1)]" disabled>
-                重溫舊夢 (讀取存檔)
+            <button id="loadGameBtn" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                重溫舊夢 (讀取本地)
             </button>
-            <button id="deleteGameBtn" class="w-full bg-rose-800 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 disabled:opacity-30 disabled:cursor-not-allowed text-sm" disabled>
-                🗑️ 毀滅人生 (刪除存檔)
+            <button id="deleteGameBtn" class="w-full bg-rose-950 hover:bg-rose-900 text-rose-300 font-medium py-1.5 px-4 rounded-lg transition duration-200 disabled:opacity-30 text-xs" disabled>
+                🗑️ 刪除本地存檔
             </button>
         </div>
     </aside>
@@ -59,18 +81,14 @@
             <div class="message-bot rounded-r-xl rounded-bl-xl p-5 md:p-6 shadow-md max-w-3xl">
                 <div class="prose prose-invert max-w-none">
                     <h3>歡迎來到 K-POP 演藝圈模擬器</h3>
-                    <p>請先在左側填寫 <strong>Gemini API Key</strong>。系統將自動為您連接本機打包的 <strong>wiki.json</strong> 知識庫。</p>
-                    <p>完成後點擊左下角按鈕：</p>
-                    <ul class="list-disc pl-5">
-                        <li>點擊<strong>「新的人生」</strong>將清除過去歷史，重啟 2007 年的練習生篇章。</li>
-                        <li>若有舊的進度，可點擊綠色的<strong>「重溫舊夢」</strong>重返故事現場。</li>
-                        <li>如果不打算繼續當前的演藝生涯，可以點擊紅色的<strong>「毀滅人生」</strong>徹底清除存檔。</li>
-                    </ul>
+                    <p>請先填寫 <strong>Gemini API Key</strong> 以及 <strong>Google 雲端同步憑證</strong>，即可享受電腦、手機隨時雲端存取同步的體驗！</p>
+                    <p>完成後點擊左下角按鈕開局，或是點選<strong>「同步雲端」</strong>拉取其他設備的進度。</p>
                 </div>
             </div>
         </div>
 
-        <div class="p-4 bg-gray-800 border-t border-gray-700 absolute bottom-0 w-full">
+        <!-- 底部輸入框 -->
+        <div class="p-4 bg-gray-800 border-t border-gray-700 absolute bottom-0 w-full pb-safe">
             <div class="max-w-4xl mx-auto relative flex items-center">
                 <textarea id="userInput" rows="1" class="w-full bg-gray-700 border border-gray-600 rounded-2xl pl-4 pr-12 py-3 text-white focus:ring-violet-500 focus:border-violet-500 resize-none" placeholder="輸入你的行動或對話..." disabled></textarea>
                 <button id="sendBtn" class="absolute right-2 p-2 bg-violet-600 hover:bg-violet-500 rounded-full text-white transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
@@ -101,38 +119,7 @@
 
 文筆規則：禁止流水帳、固定套路。每次回應需更換情緒切入點、感官描寫、節奏等。追求小說感與電影感。
 
-當劇情進入：
-• 曖昧
-• 熱戀
-• 秘密交往
-• 禁忌戀情
-• 緋聞危機
-• 分手
-• 復合
-• 求婚
-• 婚姻規劃
-主持人切換為：
-【高張力情感小說模式】
-描寫重點：
-• 眼神交流
-• 微表情變化
-• 心理拉扯
-• 情緒失控邊緣
-• 依戀與佔有慾
-• 事業與感情衝突
-• 身分帶來的壓力
-可描寫：
-• 牽手
-• 擁抱
-• 依靠
-• 親吻
-• 情感升溫
-• 急促呼吸
-• 顫抖聲線
-• 低聲耳語
-• 心跳加速
-• 難以克制的情緒波動
-所有涉及性愛的段落將不再做任何概括、模糊或省略，皆以最大尺度、完整展現角色肉體碰撞、呻吟、叫床聲、狀聲詞以及哭喊求饒等極致情欲細節為最高描寫原則。描寫極致的情感波動與肉體接觸帶來的心理震撼，所有情感戲皆須具備完整鋪陳與後續影響。
+當劇情進入：曖昧、熱戀、秘密交往、禁忌戀情、緋聞危機、分手、復合、求婚、婚姻規劃，主持人切換為【高張力情感小說模式】，加強細節描寫與心理拉扯。所有情感戲皆須具備完整鋪陳與後續影響。
 
 輸出格式必須包含：
 【劇情】(內容)
@@ -143,6 +130,12 @@
         let chatHistory = [];
         let isGameStarted = false;
 
+        // Google Sync 變數
+        let tokenClient;
+        let accessToken = null;
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -150,33 +143,41 @@
         const loadGameBtn = document.getElementById('loadGameBtn');
         const deleteGameBtn = document.getElementById('deleteGameBtn');
         const wikiStatus = document.getElementById('wikiStatus');
+        
+        const gDriveKeyInput = document.getElementById('gDriveKey');
+        const gClientIdInput = document.getElementById('gClientId');
+        const cloudUploadBtn = document.getElementById('cloudUploadBtn');
+        const cloudDownloadBtn = document.getElementById('cloudDownloadBtn');
+        const cloudStatus = document.getElementById('cloudStatus');
 
         window.addEventListener('DOMContentLoaded', async () => {
-            const savedKey = localStorage.getItem('kpop_gemini_key');
-            if (savedKey) {
-                document.getElementById('apiKey').value = savedKey;
-            }
+            // 自動帶入儲存的憑證
+            if(localStorage.getItem('kpop_gemini_key')) document.getElementById('apiKey').value = localStorage.getItem('kpop_gemini_key');
+            if(localStorage.getItem('kpop_gdrive_key')) gDriveKeyInput.value = localStorage.getItem('kpop_gdrive_key');
+            if(localStorage.getItem('kpop_gclient_id')) gClientIdInput.value = localStorage.getItem('kpop_gclient_id');
 
-            // 💾 檢查並更新按鈕狀態
             updateSaveButtonsState();
+            checkCloudInputs();
 
+            // 監聽雲端憑證輸入
+            gDriveKeyInput.addEventListener('input', checkCloudInputs);
+            gClientIdInput.addEventListener('input', checkCloudInputs);
+
+            // 自動載入世界觀
             try {
                 wikiStatus.innerText = "⏳ 正在自動載入 wiki.json...";
                 const response = await fetch('wiki.json');
-                if (!response.ok) throw new Error("找不到 wiki.json 檔案");
+                if (!response.ok) throw new Error();
                 const data = await response.json();
                 wikiData = Array.isArray(data) ? data : Object.values(data);
-                
                 wikiStatus.innerHTML = `✅ 自動載入成功！共 ${wikiData.length} 條世界觀。`;
-                wikiStatus.className = "text-sm text-green-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg";
+                wikiStatus.className = "text-xs text-green-400 font-medium bg-gray-800 border border-gray-700 p-2 rounded-lg";
             } catch (error) {
-                console.error(error);
-                wikiStatus.innerHTML = `⚠️ 未偵測到同目錄下的 wiki.json，將以純 AI 模式開局。`;
-                wikiStatus.className = "text-sm text-orange-400 mt-2 font-medium bg-gray-800 border border-gray-700 p-3 rounded-lg";
+                wikiStatus.innerHTML = `⚠️ 未偵測到 wiki.json，以純 AI 開局。`;
+                wikiStatus.className = "text-xs text-orange-400 font-medium bg-gray-800 border border-gray-700 p-2 rounded-lg";
             }
         });
 
-        // 💡 提取出獨立的按鈕狀態更新函數，方便隨時切換
         function updateSaveButtonsState() {
             const localHistory = localStorage.getItem('kpop_chat_history');
             if (localHistory && JSON.parse(localHistory).length > 0) {
@@ -187,6 +188,166 @@
                 deleteGameBtn.disabled = true;
             }
         }
+
+        function checkCloudInputs() {
+            const key = gDriveKeyInput.value.trim();
+            const id = gClientIdInput.value.trim();
+            if(key && id) {
+                cloudUploadBtn.disabled = false;
+                cloudDownloadBtn.disabled = false;
+                cloudStatus.innerText = "🟢 雲端憑證已填寫，隨時可進行同步";
+                localStorage.setItem('kpop_gdrive_key', key);
+                localStorage.setItem('kpop_gclient_id', id);
+            } else {
+                cloudUploadBtn.disabled = true;
+                cloudDownloadBtn.disabled = true;
+                cloudStatus.innerText = "請先填寫上方雲端憑證";
+            }
+        }
+
+        // ================== ☁️ GOOGLE DRIVE 雲端同步邏輯核心 ==================
+        
+        async function initGoogleAuth() {
+            return new Promise((resolve, reject) => {
+                try {
+                    gapi.load('client', async () => {
+                        await gapi.client.init({
+                            apiKey: gDriveKeyInput.value.trim(),
+                            discoveryDocs: [DISCOVERY_DOC],
+                        });
+                        
+                        tokenClient = google.accounts.oauth2.initTokenClient({
+                            client_id: gClientIdInput.value.trim(),
+                            scope: SCOPES,
+                            callback: (resp) => {
+                                if (resp.error !== undefined) {
+                                    reject(resp);
+                                    return;
+                                }
+                                accessToken = resp.access_token;
+                                resolve();
+                            },
+                        });
+                        
+                        if (accessToken === null) {
+                            tokenClient.requestAccessToken({prompt: 'consent'});
+                        } else {
+                            resolve();
+                        }
+                    });
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        // 📤 上傳到雲端
+        cloudUploadBtn.addEventListener('click', async () => {
+            const localHistory = localStorage.getItem('kpop_chat_history');
+            if(!localHistory || JSON.parse(localHistory).length === 0) {
+                return alert("目前本機沒有任何進度可以上傳喔！");
+            }
+            
+            cloudStatus.innerText = "⏳ 正在驗證雲端權限...";
+            try {
+                await initGoogleAuth();
+                cloudStatus.innerText = "⏳ 正在尋找雲端現有存檔...";
+                
+                const response = await gapi.client.drive.files.list({
+                    q: "name='kpop_rpg_cloud_save.json' and trashed=false",
+                    fields: 'files(id, name)',
+                    spaces: 'drive'
+                });
+                
+                const files = response.result.files;
+                const fileContent = JSON.stringify({
+                    chatHistory: JSON.parse(localHistory),
+                    isGameStarted: isGameStarted
+                });
+                
+                if (files.length > 0) {
+                    const fileId = files[0].id;
+                    cloudStatus.innerText = "⏳ 正在覆蓋雲端舊存檔...";
+                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: fileContent
+                    });
+                } else {
+                    cloudStatus.innerText = "⏳ 正在建立雲端新存檔...";
+                    const metadata = {
+                        name: 'kpop_rpg_cloud_save.json',
+                        mimeType: 'application/json'
+                    };
+                    
+                    const form = new FormData();
+                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                    form.append('media', new Blob([fileContent], { type: 'application/json' }));
+                    
+                    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${accessToken}` },
+                        body: form
+                    });
+                }
+                
+                cloudStatus.innerText = "✅ 雲端備份成功！";
+                alert("🎉 進度已完美同步至 Google 雲端硬碟！手機可以隨時同步下載了。");
+            } catch (err) {
+                console.error(err);
+                cloudStatus.innerText = "❌ 雲端同步失敗";
+                alert("同步失敗，請檢查 API Key / Client ID 是否填寫正確，或是否將登入帳號加入測試人員名單。");
+            }
+        });
+
+        // 📥 從雲端同步下載進度
+        cloudDownloadBtn.addEventListener('click', async () => {
+            cloudStatus.innerText = "⏳ 正在驗證雲端權限...";
+            try {
+                await initGoogleAuth();
+                cloudStatus.innerText = "⏳ 正在拉取雲端資料...";
+                
+                const response = await gapi.client.drive.files.list({
+                    q: "name='kpop_rpg_cloud_save.json' and trashed=false",
+                    fields: 'files(id, name)',
+                    spaces: 'drive'
+                });
+                
+                const files = response.result.files;
+                if (files.length === 0) {
+                    cloudStatus.innerText = "🟢 雲端沒有發現任何存檔";
+                    return alert("雲端硬碟裡找不到名為 kpop_rpg_cloud_save.json 的存檔喔！請先用有進度的設備點擊「上傳雲端」。");
+                }
+                
+                const fileId = files[0].id;
+                const fileResp = await gapi.client.drive.files.get({
+                    fileId: fileId,
+                    alt: 'media'
+                });
+                
+                const cloudData = fileResp.result;
+                if(cloudData && cloudData.chatHistory) {
+                    if(!confirm("📥 偵測到雲端存檔！下載雲端資料會將此設備目前的進度覆蓋，確定要下載嗎？")) return;
+                    
+                    localStorage.setItem('kpop_chat_history', JSON.stringify(cloudData.chatHistory));
+                    chatHistory = cloudData.chatHistory;
+                    isGameStarted = cloudData.isGameStarted || true;
+                    
+                    cloudStatus.innerText = "✅ 雲端載入成功！";
+                    alert("✨ 雲端存檔同步成功！已成功載入最新進度，請點擊「重溫舊夢」繼續遊戲！");
+                    updateSaveButtonsState();
+                }
+            } catch (err) {
+                console.error(err);
+                cloudStatus.innerText = "❌ 雲端同步失敗";
+                alert("同步失敗，請確認雲端資訊設定無誤。");
+            }
+        });
+
+        // ======================================================================
 
         function getRelevantContext(text) {
             if (wikiData.length === 0) return "";
@@ -239,9 +400,7 @@
                 const btn = document.createElement("button");
                 btn.className = "bg-violet-700 hover:bg-violet-600 text-white font-medium text-sm px-4 py-2.5 rounded-xl transition duration-150 shadow-sm";
                 btn.innerText = line;
-                btn.onclick = () => {
-                    callGeminiAPI(line);
-                };
+                btn.onclick = () => { callGeminiAPI(line); };
                 div.appendChild(btn);
             });
 
@@ -251,13 +410,9 @@
 
         async function callGeminiAPI(userMessage) {
             const apiKey = document.getElementById('apiKey').value.trim();
-            if (!apiKey) {
-                alert("請先填寫 Gemini API Key！");
-                return;
-            }
+            if (!apiKey) return alert("請先填寫 Gemini API Key！");
 
             localStorage.setItem('kpop_gemini_key', apiKey);
-
             userInput.disabled = true;
             sendBtn.disabled = true;
             appendMessage('user', userMessage);
@@ -267,14 +422,8 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             const context = getRelevantContext(userMessage);
-            
-            let promptText = "";
-            if (!isGameStarted) {
-                promptText = `${SYSTEM_PROMPT}\n\n玩家已準備好，請輸出第一回合的開局角色設定問卷。`;
-                isGameStarted = true;
-            } else {
-                promptText = `玩家行動：${userMessage}${context}`;
-            }
+            let promptText = !isGameStarted ? `${SYSTEM_PROMPT}\n\n玩家已準備好，請輸出第一回合的開局角色設定問卷。` : `玩家行動：${userMessage}${context}`;
+            if(!isGameStarted) isGameStarted = true;
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
@@ -282,18 +431,13 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                        contents: [
-                            ...chatHistory,
-                            { role: 'user', parts: [{ text: promptText }] }
-                        ],
+                        contents: [ ...chatHistory, { role: 'user', parts: [{ text: promptText }] } ],
                         generationConfig: { temperature: 0.7 }
                     })
                 });
 
                 const text = await response.text();
-                const loadingEl = document.getElementById(loadingId);
-                if (loadingEl) loadingEl.remove();
-
+                document.getElementById(loadingId)?.remove();
                 const data = JSON.parse(text);
 
                 if (data.error) {
@@ -310,12 +454,9 @@
                     localStorage.setItem('kpop_chat_history', JSON.stringify(chatHistory));
                     updateSaveButtonsState();
                 }
-
             } catch (err) {
-                console.error(err);
-                const loadingEl = document.getElementById(loadingId);
-                if (loadingEl) loadingEl.remove();
-                appendMessage('bot', `### 發生錯誤\n\n${err.message}\n\n請確認您的 API Key 是否正確或網路狀態健全。`);
+                document.getElementById(loadingId)?.remove();
+                appendMessage('bot', `### 發生錯誤\n\n${err.message}`);
             }
 
             userInput.disabled = false;
@@ -327,34 +468,22 @@
         function lockMenuButtons() {
             newGameBtn.disabled = true;
             newGameBtn.innerText = "遊戲進行中...";
-            newGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-2.5 px-4 rounded-lg cursor-not-allowed";
-            
+            newGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-2.5 px-4 rounded-lg cursor-not-allowed text-sm";
             loadGameBtn.disabled = true;
             loadGameBtn.innerText = "存檔已載入";
-            loadGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-2.5 px-4 rounded-lg cursor-not-allowed";
-            
+            loadGameBtn.className = "w-full bg-gray-600 text-gray-400 font-bold py-2.5 px-4 rounded-lg cursor-not-allowed text-sm";
             deleteGameBtn.disabled = true;
-            deleteGameBtn.innerText = "遊戲進行中無法刪除";
-            deleteGameBtn.className = "w-full bg-gray-800 text-gray-500 font-medium py-2 px-4 rounded-lg cursor-not-allowed text-sm";
         }
 
-        // 🆕 點擊「新的人生」按鈕
         newGameBtn.addEventListener('click', () => {
-            if (!document.getElementById('apiKey').value.trim()) {
-                return alert("沒有 API Key 無法啟動大腦喔！");
-            }
-
+            if (!document.getElementById('apiKey').value.trim()) return alert("請先輸入 Gemini API Key");
             const hasSaved = localStorage.getItem('kpop_chat_history');
             if (hasSaved && JSON.parse(hasSaved).length > 0) {
-                if (!confirm("⚠️ 注意：開啟新的人生會【完全覆蓋並刪除】過去的存檔！確定要重新開始嗎？")) {
-                    return;
-                }
+                if (!confirm("⚠️ 注意：開啟新的人生會【完全覆蓋並刪除】本機存檔！確定要重新開始嗎？")) return;
             }
-
             localStorage.removeItem('kpop_chat_history');
             chatHistory = [];
             isGameStarted = false;
-            
             lockMenuButtons();
             chatBox.innerHTML = ''; 
             userInput.disabled = false;
@@ -362,18 +491,13 @@
             callGeminiAPI("遊戲開始");
         });
 
-        // 💾 點擊「重溫舊夢」按鈕
         loadGameBtn.addEventListener('click', () => {
-            if (!document.getElementById('apiKey').value.trim()) {
-                return alert("沒有 API Key 無法啟動大腦喔！");
-            }
-
+            if (!document.getElementById('apiKey').value.trim()) return alert("請先輸入 Gemini API Key");
             const localHistory = localStorage.getItem('kpop_chat_history');
             if (!localHistory) return alert("找不到可讀取的存檔！");
 
             chatHistory = JSON.parse(localHistory);
             isGameStarted = true;
-            
             lockMenuButtons();
             chatBox.innerHTML = ''; 
             userInput.disabled = false;
@@ -382,8 +506,7 @@
             chatHistory.forEach(msg => {
                 const sender = msg.role === 'user' ? 'user' : 'bot';
                 if (sender === 'user' && msg.parts[0].text.startsWith("玩家行動：")) {
-                    const cleanText = msg.parts[0].text.replace("玩家行動：", "").split("\n\n【系統提示：")[0];
-                    appendMessage('user', cleanText);
+                    appendMessage('user', msg.parts[0].text.replace("玩家行動：", "").split("\n\n【系統提示：")[0]);
                 } else if (sender === 'bot') {
                     appendMessage('bot', msg.parts[0].text);
                 }
@@ -392,34 +515,16 @@
             if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'model') {
                 createChoiceButtons(chatHistory[chatHistory.length - 1].parts[0].text);
             }
-            
-            appendMessage('bot', `<p style="color:#4ade80; font-weight:bold;">✨ 歡迎回來！已成功讀取上次進度。請繼續你的韓娛旅程！</p>`);
+            appendMessage('bot', `<p style="color:#4ade80; font-weight:bold;">✨ 已成功讀取本機進度。請繼續你的韓娛旅程！</p>`);
         });
 
-        // 🗑️ 點擊「毀滅人生 (刪除存檔)」按鈕
         deleteGameBtn.addEventListener('click', () => {
-            if (!confirm("⚠️ 確定要永久刪除你的韓娛人生存檔嗎？此動作將清除所有過往進度且無法復原！")) {
-                return; // 玩家點擊取消
-            }
-
-            // 執行完全清除
+            if (!confirm("⚠️ 確定要永久刪除你的本地存檔嗎？此動作無法復原！")) return;
             localStorage.removeItem('kpop_chat_history');
             chatHistory = [];
             isGameStarted = false;
-
-            // 重置介面上的歡迎語與按鈕狀態
-            chatBox.innerHTML = `
-                <div class="message-bot rounded-r-xl rounded-bl-xl p-5 md:p-6 shadow-md max-w-3xl">
-                    <div class="prose prose-invert max-w-none">
-                        <p style="color: #f87171; font-weight: bold;">🗑️ 存檔已成功徹底刪除！</p>
-                        <p>過往歷史已被洗白。你可以隨時點擊左側的<strong>「新的人生」</strong>按鈕重新開啟你的出道篇章。</p>
-                    </div>
-                </div>
-            `;
-            
-            // 重新整理按鈕狀態（讓它們變回灰色停用狀態）
+            chatBox.innerHTML = `<div class="message-bot rounded-r-xl rounded-bl-xl p-5 shadow-md max-w-3xl"><p style="color: #f87171; font-weight: bold;">🗑️ 本地存檔已徹底刪除！</p></div>`;
             updateSaveButtonsState();
-            alert("存檔已清除乾淨！");
         });
 
         sendBtn.addEventListener('click', () => {
